@@ -1,3 +1,5 @@
+//var FitParser = require('./fit-parser/fit-parser.js').default;
+//import FitParser from './fit-parser/fit-parser.js';
 
 var search, table_rows, table_headings
 
@@ -21,8 +23,33 @@ function testFunction() {
 }
 
 async function loadFitFile() {
-    console.log(`load filt file`)
-    alert(this.id);
+    // console.log(`load filt file`)
+    // alert(this.id);
+    const xhr = new XMLHttpRequest();
+	xhr.open("GET", "http://localhost:8088/activity/"+this.id);
+	xhr.send();
+	xhr.responseType = "json";
+    xhr.onload = () => {
+        const data = xhr.response;
+
+        // var fitParser = new FitParser({
+        //     force: true,
+        //     speedUnit: 'km/h',
+        //     lengthUnit: 'm',
+        //     temperatureUnit: 'celsius',
+        //     elapsedRecordField: true,
+        //     mode: 'list',
+        //   });
+
+        //   fitParser.parse(content, function (error, data) {
+        //     if (error) {
+        //       console.log(error);
+        //     } else {
+        //       console.log(JSON.stringify(data));
+        //       //console.log(data.records[0]);
+        //     }
+        //   });
+    }
 }
 
 async function onLoad() {
