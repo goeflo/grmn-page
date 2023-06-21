@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="style.css">
+	<script src="script.js"></script>
+</head>
+
+<body onload="onLoad();">
+
+<p id="demo">nothing to see here<br>
+<button type="button" onclick="testFunction()">push</button>
+</p>
+
+<p>
+<main class="table">
+<section class="table__header">
+	<h1>Fit Files</h1>
+	<div class="input-group">
+		<input type="search" placeholder="Search Data...">
+	</div>
+</section>
+<section class="table__body">
+
+	<table>
+		<thead>
+			<tr>
+				<th> Date <span class="icon-arrow">&UpArrow;</span></th>
+				<th> Time <span class="icon-arrow">&UpArrow;</span></th>
+				<th> Filename <span class="icon-arrow">&UpArrow;</span></th>
+			</tr>
+		</thead>
+		<tbody id="fit-table-body">
+		</tbody>
+	</table>
+</section>
+</main>
+</p>
+
+<p>
+	<div id="fit-list"></div>
+</p>
+
+</body>
+</html>
