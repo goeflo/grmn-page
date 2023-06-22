@@ -2,7 +2,23 @@
 <html>
 <head>
 	<link rel="stylesheet" href="style.css">
-	<script src="script.js"></script>
+	<script type="text/javascript" src="script.js"></script>
+	<script type="text/javascript" src="charts.js"></script>
+	<script type="text/javascript" src="jquery-3.7.0.js"></script>
+	<script type="text/javascript" src="jquery.canvasjs.min.js"></script>
+	<script type="text/javascript" src="canvasjs.min.js"></script>
+	<style>
+		.row:after {
+		  content: "";
+		  display: table;
+		  clear: both;
+		}
+		.col {
+		  float: left;
+		  width: 50%;
+		  height: 270px;
+		}
+	  </style>
 </head>
 
 <body onload="onLoad();">
@@ -11,8 +27,18 @@
 <button type="button" onclick="testFunction()">push</button>
 </p>
 
+<main id="fit_charts">
+<div class="row">
+	<div class="col"id="altitudeChart"></div>
+</div>
+<div class="row">
+	<div class="col" id="powerChart"></div>
+</div>
+<button type="button" onclick="showTable()">table</button>
+</main>
+
 <p>
-<main class="table">
+<main id="fit_table" class="table">
 <section class="table__header">
 	<h1>Fit Files</h1>
 	<div class="input-group">
@@ -20,7 +46,6 @@
 	</div>
 </section>
 <section class="table__body">
-
 	<table>
 		<thead>
 			<tr>
@@ -36,9 +61,6 @@
 </main>
 </p>
 
-<p>
-	<div id="fit-list"></div>
-</p>
 
 </body>
 </html>

@@ -2,6 +2,7 @@
 //import FitParser from './fit-parser/fit-parser.js';
 
 var search, table_rows, table_headings
+var fitTable, fitCharts
 
 function searchTable() {
     table_rows.forEach((row, i) => {
@@ -23,14 +24,19 @@ function testFunction() {
 }
 
 async function loadFitFile() {
-    // console.log(`load filt file`)
-    // alert(this.id);
+    
+    var fitTable = document.getElementById('fit_table');
+    fitCharts.style.display = "block"
+    fitTable.style.display = "none"
+
     const xhr = new XMLHttpRequest();
 	xhr.open("GET", "http://localhost:8088/activity/"+this.id);
 	xhr.send();
 	xhr.responseType = "json";
     xhr.onload = () => {
         const data = xhr.response;
+        console.log(data);
+        drawCharts(data)
 
         // var fitParser = new FitParser({
         //     force: true,
@@ -52,7 +58,17 @@ async function loadFitFile() {
     }
 }
 
+function showTable() {
+    fitCharts.style.display = "none"
+    fitTable.style.display = "block"
+}
+
 async function onLoad() {
+
+    fitTable = document.getElementById('fit_table');
+    fitCharts = document.getElementById('fit_charts');
+    fitCharts.style.display = "none"
+    fitTable.style.display = "block"
 
     search = document.querySelector('.input-group input');
     table_rows = document.querySelectorAll('tbody tr');
@@ -72,27 +88,21 @@ async function onLoad() {
 
 			for(var i = 0; i < data.length; ++i) {
 				var tr = document.createElement('tr');
-                tr.id = data[i].Filename;
+                tr.id = data[i];
                 tr.onclick = loadFitFile;
 				tableBody.appendChild(tr);
 
 				var td = document.createElement('td');
-				td.innerHTML += data[i].Date;
-				tr.appendChild(td);
+                td.appendChild(document.createTextNode(data[i]));
+                tr.appendChild(td);
 
-				var td = document.createElement('td');
-				td.innerHTML += data[i].Time;
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-                td.appendChild(document.createTextNode(data[i].Filename));
                 // var a = document.createElement('a');
                 // var linkText = document.createTextNode(data[i].Filename);
                 //a.onclick=loadFitFile(data[i].Filename)
                 // a.appendChild(linkText);
                 // a.title = data[i].Filename;
                 //a.href = "http://localhost:8088/activity/"+data[i].Filename;
-                tr.appendChild(td);
+                
 			}
 
   		} else {
