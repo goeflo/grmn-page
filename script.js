@@ -1,6 +1,7 @@
 //var FitParser = require('./fit-parser/fit-parser.js').default;
 //import FitParser from './fit-parser/fit-parser.js';
 
+
 var search, table_rows, table_headings
 var fitTable, fitCharts
 

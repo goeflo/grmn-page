@@ -1,0 +1,19 @@
+* {
+    font-family: monospace;
+    margin: 0;
+    padding: 0;
+}
+ 
+
+body {
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart { 
+    width: 100%; 
+    height: 300px; }
+
+#powergraph { float:left }
+#altitudegraph { float:left }
