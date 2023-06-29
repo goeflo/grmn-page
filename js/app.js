@@ -1,6 +1,6 @@
 
 var fitData
-var altData = [], powerData = []
+var altData = [], powerData = [], speedData = []
 
 const xhr = new XMLHttpRequest();
 xhr.open("GET", "http://localhost:8088/activity/2023-06-04T06:30:28+00:00_11268316944.fit");
@@ -18,8 +18,8 @@ xhr.onload = () => {
     document.getElementById("activity-date").innerHTML = fitData.Date;
     document.getElementById("activity-product-name").innerHTML = fitData.Product;
     document.getElementById("activity-moving-time").innerHTML = movingTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false});
-    document.getElementById("activity-distance").innerHTML = fitData.Distance/100000 + " km";
-    document.getElementById("activity-normalized-power").innerHTML = fitData.NormalizedPower + " watt";
+    document.getElementById("activity-distance").innerHTML = fitData.Distance/100000 + "km";
+    document.getElementById("activity-normalized-power").innerHTML = fitData.NormalizedPower + "watt";
 
     var dtOld = 0;
     var records = fitData.Records;
@@ -44,8 +44,11 @@ xhr.onload = () => {
         distance = records[i].Distance/100000;
         pwr = parseInt(records[i].Power);
         if (pwr == 65535) pwr = 0;
+        speed = (records[i].Speed*3.6) / 1000;
         altData.push([distance, parseInt(records[i].Altitude)]);
         powerData.push([distance, pwr]);
+        speedData.push([distance, speed]);
+
     }
  
     var powergraph = new Dygraph(
@@ -54,7 +57,7 @@ xhr.onload = () => {
         {
             title: "power",
             ylabel: 'power (w)',
-            labels: [ 'Date', 'Watt' ],
+            labels: [ 'km', 'Watt' ],
             animatedZooms: true,
             zoomCallback: graphZoomCallback
         }
@@ -67,13 +70,25 @@ xhr.onload = () => {
         {
             title: "elevation",
             ylabel: "elevation (m)",
-            labels: [ 'Date', 'hm' ],
+            labels: [ 'km', 'hm'],
             animatedZooms: true,
             zoomCallback: graphZoomCallback
         }
     );
 
-    Dygraph.synchronize(altitudegraph, powergraph,
+    var speedgraph = new Dygraph(
+        document.getElementById("speedgraph"),
+        speedData, 
+        {
+            title: "speed",
+            ylabel: "speed (km/h)",
+            labels: [ 'km', 'km/h'],
+            animatedZooms: true,
+            zoomCallback: graphZoomCallback
+        }
+    );
+
+    Dygraph.synchronize(altitudegraph, powergraph, speedgraph,
     {
         range: false
     }); 
@@ -81,6 +96,6 @@ xhr.onload = () => {
 
 function graphZoomCallback(minX, maxX, yRanges) {
     s = document.getElementById("debug");
-    s.innerHTML = "<b>Zoom</b> selected distance: " + (maxX-minX) + "<br>";
+    s.innerHTML = "<b>Zoom</b> selected distance: " + (maxX-minX) + "km<br>";
     //s.innerHTML += "<b>Zoom</b> [" + minX + ", " + maxX + ", [" + yRanges + "]]<br />";
 }
