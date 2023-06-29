@@ -1,66 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="stylesheet" href="style.css">
-	<script type="text/javascript" src="script.js"></script>
-	<script type="text/javascript" src="charts.js"></script>
-	<script type="text/javascript" src="jquery-3.7.0.js"></script>
-	<script type="text/javascript" src="jquery.canvasjs.min.js"></script>
-	<script type="text/javascript" src="canvasjs.min.js"></script>
-	<style>
-		.row:after {
-		  content: "";
-		  display: table;
-		  clear: both;
-		}
-		.col {
-		  float: left;
-		  width: 50%;
-		  height: 270px;
-		}
-	  </style>
-</head>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>activity analyzer</title>
+        <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>-->
+        <!--<link rel="stylesheet" type="text/css" href="js/dygraph.css" />-->
+        <link rel="stylesheet" type="text/css" href="style.css" />
 
-<body onload="onLoad();">
+        <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+        <script type="text/javascript" src="js/dygraph.js"></script>
+        <script type="text/javascript" src="js/synchronizer.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+    </head>
+    <body>
 
-<p id="demo">nothing to see here<br>
-<button type="button" onclick="testFunction()">push</button>
-</p>
+        <h1>fit data anaylzer</h1>
 
-<main id="fit_charts">
-<div class="row">
-	<div class="col"id="altitudeChart"></div>
-</div>
-<div class="row">
-	<div class="col" id="powerChart"></div>
-</div>
-<button type="button" onclick="showTable()">table</button>
-</main>
+        <div class="table">
+            <div class="table-row">
+                <div class="table-col">date</div>
+                <div id="activity-date" class="table-col">2012-01-01 00:00:00</div>
+            </div>
+            <div class="table-row">
+                <div class="table-col">product</div>
+                <div id="activity-product-name" class="table-col">noname</div>
+            </div>
+            <div class="table-row">
+                <div class="table-col">moving time</div>
+                <div id="activity-moving-time" class="table-col">20h</div>
+            </div>
+            <div class="table-row">
+                <div class="table-col">distance</div>
+                <div id="activity-distance" class="table-col">200km</div>
+            </div>
+            <div class="table-row">
+                <div class="table-col">normalized power</div>
+                <div id="activity-normalized-power" class="table-col">3000 watt</div>
+            </div>
+        </div>
 
-<p>
-<main id="fit_table" class="table">
-<section class="table__header">
-	<h1>Fit Files</h1>
-	<div class="input-group">
-		<input type="search" placeholder="Search Data...">
-	</div>
-</section>
-<section class="table__body">
-	<table>
-		<thead>
-			<tr>
-				<th> Date <span class="icon-arrow">&UpArrow;</span></th>
-				<th> Time <span class="icon-arrow">&UpArrow;</span></th>
-				<th> Filename <span class="icon-arrow">&UpArrow;</span></th>
-			</tr>
-		</thead>
-		<tbody id="fit-table-body">
-		</tbody>
-	</table>
-</section>
-</main>
-</p>
+        <hr>
+        <div class="chart" id="powergraph"></div>
+        <hr>
+        <div class="chart" id="altitudegraph"></div>
 
-
-</body>
+        <hr>
+        <div id="debug"></div>
+        
+    </body>
 </html>
