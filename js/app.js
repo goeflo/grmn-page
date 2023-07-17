@@ -19,6 +19,7 @@ xhr.onload = () => {
     document.getElementById("activity-product-name").innerHTML = fitData.Product;
     document.getElementById("activity-moving-time").innerHTML = movingTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12:false});
     document.getElementById("activity-distance").innerHTML = fitData.Distance/100000 + "km";
+    document.getElementById("activity-average-power").innerHTML = fitData.AveragePower + "watt";
     document.getElementById("activity-normalized-power").innerHTML = fitData.NormalizedPower + "watt";
 
     var dtOld = 0;
@@ -28,26 +29,26 @@ xhr.onload = () => {
 
         /* keep this to convert timestamp in record into data
         to display time based graph set 'dt' instead of 'distance' for the x-axis
-
+*/
         dt = Date.parse(records[i].Timestamp);
 
-        if (i==0) {
+        /*if (i==0) {
             dtOld = dt;
             dt = 0;
         } else {
             dt = dt - dtOld;
-        }
+        }*/
 
-        newDate = new Date();
-        newDate.setTime(dt);
-        */
-        distance = records[i].Distance/100000;
+        newDate = new Date(dt);
+        //newDate.setTime(dt);
+  
+        //distance = records[i].Distance/100000;
         pwr = parseInt(records[i].Power);
         if (pwr == 65535) pwr = 0;
         speed = (records[i].Speed*3.6) / 1000;
-        altData.push([distance, parseInt(records[i].Altitude)]);
-        powerData.push([distance, pwr]);
-        speedData.push([distance, speed]);
+        altData.push([newDate, parseInt(records[i].Altitude)]);
+        powerData.push([newDate, pwr]);
+        speedData.push([newDate, speed]);
 
     }
  
@@ -98,7 +99,33 @@ xhr.onload = () => {
 
 function graphZoomCallback(minX, maxX, yRanges) {
     s = document.getElementById("debug");
-    
+    powerOutput = document.getElementById("selected-power");
+    s.innerHTML = "<b>Zoom</b> selected minx: " + minX + " maxx: " + maxX + "<br>";
+
+    minXDate = new Date(minX);
+    maxXDate = new Date(maxX);
+    minIdx = 0;
+    maxIdx = 0;
+    for (i=0; i<powerData.length; i++) {
+        if (powerData[i][0].valueOf() >= minXDate.valueOf() && minIdx == 0) minIdx = i;
+        if (powerData[i][0].valueOf() >= maxXDate.valueOf() && maxIdx == 0) maxIdx = i;
+        if (minIdx != 0 && maxIdx != 0) break;
+    }
+    s.innerHTML += "min idx: " + minIdx + " max idx: " + maxIdx + "<br>";
+    s.innerHTML += "min time: " + powerData[minIdx][0] + " max time: " + powerData[maxIdx][0] + "<br>";
+
+    avgPwr = 0;
+    for (let i=minIdx; i<maxIdx; i++) {
+        avgPwr += parseFloat(powerData[i][1]);
+    }
+    avgPwr = Math.round(avgPwr/(maxIdx-minIdx));
+    powerOutput.innerHTML = "selected avg power: " + avgPwr + "w<br>";
+
+    // calculate normalized power of selection
+    np = calulateNormalizedPower(records, minIdx, maxIdx);
+    powerOutput.innerHTML += "selected normalized power: " + np + "w<br>";
+    return;
+
     // given min and max x values are distance based because y axsis is distance.
     // get the indices into the data record array for the distance values
     minIdx = 0;
@@ -110,6 +137,7 @@ function graphZoomCallback(minX, maxX, yRanges) {
         if (parseFloat(powerData[i][0]) >= maxX && maxIdx == 0) {
             maxIdx = i;
         }
+        if (minIdx != 0 && maxIdx != 0) break;
     }
 
     avgPwr = 0;
@@ -133,63 +161,74 @@ function graphZoomCallback(minX, maxX, yRanges) {
 }
 
 function calulateNormalizedPower(records, startIdx, endIdx) {
+
+    // we select everything or only the start
+    if (startIdx <= 1) {
+        startIdx += 30;
+    }
+
     var s = document.getElementById("debug");
+    var initialDate = new Date(records[0].Timestamp)
     var startDate = new Date(records[startIdx].Timestamp);
     var endDate = new Date(records[endIdx].Timestamp);
     var diffDate = new Date(endDate.getTime() - startDate.getTime());
     var diffSeconds = diffDate.getTime()/1000;
+    var intialDiffDate = new Date(startDate.getTime() - initialDate.getTime());
+    var initialDiffSeconds = intialDiffDate.getTime()/1000;
+
+    if (initialDiffSeconds <= 30) {
+        s.innerHTML += "start time difference is: " + initialDiffSeconds + "sec, can not calculate np<br>";
+        return 0.0;
+    }
 
     if (diffSeconds < 30) {
         s.innerHTML += "selected time difference is: " + diffSeconds + "sec, can not calculate np<br>";
         return 0.0;
     }
 
+    // https://jaylocycling.com/easily-understand-cycling-normalized-power/
     // calculate rolling 30 sec power average
-    var secAvgPower = [];
+    // take power of 4 of the 30 sec value and add to the previouse calculated value
+    // for a summary of all values to calculate the average afterwards
+    var normPower = 0.0;
     for (let i=startIdx; i<endIdx; i++) {
-        secAvgPower.push(calculate30SecAverage(records, i));
+        thirtySecAverage = calculate30SecAverage(records, i);
+        normPower += Math.pow(thirtySecAverage, 4);
     }
-    s.innerHTML += "30 sec avg power: " + secAvgPower + "<br>";
 
-    // take power of 4 for each 30 sec value
-    // and calculate the average of all power values
-    avgPower = 0.0;
-    for (i in secAvgPower) {
-        avgPower += Math.pow(secAvgPower[i], 4)
-    }
-    avgPower = avgPower / secAvgPower.length;
-
-    // the forth root of the new avg value is the np
+    // calculate the average of avgPower by dividing with the number of values
+    // added to avgPower and return the forth root of that average.
     // forth root is the same as power of 1/4 or 0.25
-    return Math.pow(avgPower, 0.25);
+    normPower = normPower / (endIdx-startIdx);
+    return Math.round(Math.pow(normPower, 0.25));
     
 }
 
+// calculate average power of the previouse 30 sec
 function calculate30SecAverage(records, startIdx) {
+
     var s = document.getElementById("debug");
     var startDate = new Date(records[startIdx].Timestamp);
     var avgPower = records[startIdx].Power;
-    var nextIdx = startIdx + 1;
+    var prevIdx = startIdx--;
     var loopCounter = 0;
 
     do {
-        var endDate = new Date(records[nextIdx].Timestamp);
-        var diffDate = new Date(endDate.getTime() - startDate.getTime());
+        var prevDate = new Date(records[prevIdx].Timestamp);
+        var diffDate = new Date(startDate.getTime() - prevDate.getTime());
         var diffSeconds = diffDate.getTime()/1000;
 
-        if (records[nextIdx].Power != 65535) {
-            avgPower += records[nextIdx].Power;
-        }
+        if (records[prevIdx].Power != 65535) {
+            avgPower += records[prevIdx].Power;
+            //loopCounter++;
+        } 
 
-        nextIdx++;
+        prevIdx--;
         loopCounter++;
-    } while (diffSeconds < 30 && nextIdx != records.length);
+    } while (diffSeconds < 30 && prevIdx != 0);
 
-    if (nextIdx == records.length && diffSeconds < 30) {
-        return 0.0;
-    }
-
-    return avgPower / loopCounter;
+    // decrease loop counter because we have increased it before exiting the while loop
+    return avgPower / loopCounter--;
 }
 
 /*
@@ -197,7 +236,8 @@ pwr = parseInt(records[i].Power);
         if (pwr == 65535) pwr = 0;
         
         
-            Step 1: Calculate the rolling average with a window of 30 seconds: Start at 30 seconds, calculate the average power of the previous 30 seconds and to the for every second after that.
+            Step 1: Calculate the rolling average with a window of 30 seconds: 
+            Start at 30 seconds, calculate the average power of the previous 30 seconds and to the for every second after that.
 
     Step 2: Calculate the 4th power of the values from the previous step.
 
